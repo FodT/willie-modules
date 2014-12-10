@@ -106,7 +106,7 @@ def scsearch(bot, trigger):
     """Search Soundcloud"""
     if not trigger.group(2):
         return
-    uri = 'http://api.soundcloud.com/tracks?client_id=3639a3c4768be1fdd5a69afea8bbf619&q=' + trigger.group(2)
+    uri = 'http://api.soundcloud.com/tracks?client_id=3639a3c4768be1fdd5a69afea8bbf619&q=' + trigger.group(2) + '&limit=1'
     
     song_info = scget(bot, trigger, uri)
     if song_info is 'err':
