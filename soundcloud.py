@@ -9,20 +9,15 @@ This module will respond to .sc and .soundcloud commands and searches soundcloud
 from __future__ import unicode_literals
 
 from willie import web, tools
-from willie.module import rule, commands, example
+from willie.module import rule, commands, example, rate
 import json
 import re
 import sys
+
 if sys.version_info.major < 3:
     from HTMLParser import HTMLParser
 else:
     from html.parser import HTMLParser
-
-
-
-def setup(bot):
-    if not bot.memory.contains('url_callbacks'):
-        bot.memory['url_callbacks'] = tools.WillieMemory()
 
 
 def scget(bot, trigger, uri):
@@ -104,14 +99,14 @@ def scget(bot, trigger, uri):
  
     return song_info
 
-@rate(10)
+@rate(5)
 @commands('sc', 'soundcloud')
 @example('.sc never gonna give you up')
 def scsearch(bot, trigger):
     """Search Soundcloud"""
     if not trigger.group(2):
         return
-    uri = 'http://api.soundcloud.com/tracks?client_id=YOUR_CLIENT_ID&q=' + trigger.group(2)
+    uri = 'http://api.soundcloud.com/tracks?client_id=3639a3c4768be1fdd5a69afea8bbf619&q=' + trigger.group(2)
     
     song_info = scget(bot, trigger, uri)
     if song_info is 'err':
