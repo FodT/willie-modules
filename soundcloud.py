@@ -104,7 +104,7 @@ def scget(bot, trigger, uri):
  
     return song_info
 
-@rate(5)
+@rate(10)
 @commands('sc', 'soundcloud')
 @example('.sc never gonna give you up')
 def scsearch(bot, trigger):
