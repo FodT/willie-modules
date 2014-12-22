@@ -61,7 +61,7 @@ def scget(bot, trigger, uri):
         minutes = ((duration / (1000*60)) % 60)
         seconds = (duration / 1000) % 60
 
-	song_info['length'] = '%d:%d:%d' % (hours, minutes, seconds)
+	song_info['length'] = '%02d:%02d:%02d' % (hours, minutes, seconds)
     except KeyError:
         song_info['length'] = 'N/A'
 
