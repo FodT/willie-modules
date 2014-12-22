@@ -48,10 +48,8 @@ def scget(bot, trigger, uri):
     #get upload time in format: yyyy-MM-ddThh:mm:ss.sssZ
     try:
         upraw = song_entry['last_modified']
-        #parse from current format to output format: DD/MM/yyyy, hh:mm
-        song_info['uploaded'] = '%s/%s/%s, %s:%s' % (upraw[8:10], upraw[5:7],
-                                                  upraw[0:4], upraw[11:13],
-                                                  upraw[14:16])
+        #parse from current format to output format: DD/MM/yyyy
+        song_info['uploaded'] = '%s/%s/%s' % (upraw[8:10], upraw[5:7], upraw[0:4])
     except KeyError:
         song_info['uploaded'] = 'N/A'
 
@@ -62,17 +60,8 @@ def scget(bot, trigger, uri):
         hours = ((duration / (1000*60*60)) % 24)
         minutes = ((duration / (1000*60)) % 60)
         seconds = (duration / 1000) % 60
-        song_info['length'] = ''
-        if hours:
-            song_info['length'] = str(hours) + 'hours'
-        if minutes or seconds:
-            song_info['length'] = song_info['length'] + ' '
-        if minutes:
-            song_info['length'] = song_info['length'] + str(minutes) + 'mins'
-        if seconds:
-            song_info['length'] = song_info['length'] + ' '
-        if seconds:
-              song_info['length'] = song_info['length'] + str(seconds) + 'secs'
+
+	song_info['length'] = '%d:%d:%d' % (hours, minutes, seconds)
     except KeyError:
         song_info['length'] = 'N/A'
 
@@ -113,16 +102,14 @@ def scsearch(bot, trigger):
         return
 
     if song_info['link'] == 'N/A':
-        bot.say("Sorry, I couldn't find the song you are looking for")
+        bot.reply("Sorry, I couldn't find the song you are looking for")
         return
 	
 	#combine variables and print
-    message = '[SC Search] Title: ' + song_info['title'] + \
-              ' | Uploader: ' + song_info['uploader'] + \
+    message =  song_info['title'] + \
               ' | Uploaded: ' + song_info['uploaded'] + \
               ' | Duration: ' + song_info['length'] + \
-              ' | Listens: ' + song_info['listens'] + \
-              ' | Link: ' +  song_info['link'] 
+              ' | ' +  song_info['link'] 
 	
 
-    bot.say(HTMLParser().unescape(message))
+    bot.reply(HTMLParser().unescape(message))
