@@ -57,7 +57,8 @@ def didYouHearThat(bot, trigger):
 
     for word in trigger.split(' '):
         if word in bot.memory['triggerdict']:
-            bot.say(random.choice(bot.memory['triggerdict'][word]))
+            if random.random() < 0.3
+                bot.say(random.choice(bot.memory['triggerdict'][word]))
             return
 
 def save_trigger_dict(bot):
