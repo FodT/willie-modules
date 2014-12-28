@@ -1,6 +1,6 @@
 # coding=utf8
 """
-triggerwarning.py - Willie trigger phrase module
+triggerwarning.py - Willie trigger phrase module, 2014
 
 define trigger words and phrases for general fun and amusement
 
