@@ -3,7 +3,6 @@
 triggerwarning.py - Willie trigger phrase module, 2014
 
 define trigger words and phrases for general fun and amusement
-
 """
 from __future__ import unicode_literals
 from collections import defaultdict
