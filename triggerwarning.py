@@ -26,7 +26,7 @@ def release_trigger(bot, trigger):
         bot.say(".releasetrigger <keyword> - removes all phrases for that keyword")
         return
     else:
-        trigger_key = trigger.group(2).strip()
+        trigger_key = trigger.group(2).strip().lower()
         if trigger_key in bot.memory['triggerdict']:
             bot.memory['triggerdict'].pop(trigger_key, None)
             save_trigger_dict(bot)
@@ -44,7 +44,7 @@ def trigger_def(bot, trigger):
         return
     else:
         trigger_sequence = trigger.group(2).strip().partition(r' ')
-        trigger_key = trigger_sequence[0]
+        trigger_key = trigger_sequence[0].lower()
         trigger_phrase = trigger_sequence[2]
         bot.memory['triggerdict'][trigger_key].append(trigger_phrase)
         save_trigger_dict(bot)
@@ -55,9 +55,9 @@ def didYouHearThat(bot, trigger):
     if bot.nick is trigger.nick:
         return
 
-    for word in trigger.split(' '):
+    for word in trigger.lower().split(' '):
         if word in bot.memory['triggerdict']:
-            if random.random() < 0.3
+            if random.random() < 0.3:
                 bot.say(random.choice(bot.memory['triggerdict'][word]))
             return
 
