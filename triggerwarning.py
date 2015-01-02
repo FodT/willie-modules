@@ -54,9 +54,10 @@ def loadTriggers(fn, lock):
     lock.release()
     return result
 
-	
 @commands('releasetrigger')
 def release_trigger(bot, trigger):
+    if not trigger.admin:
+        return
     if not trigger.group(2):
         bot.say(".releasetrigger <keyword> - removes all phrases for that keyword")
         return
@@ -84,6 +85,16 @@ def trigger_def(bot, trigger):
         bot.memory['triggerwarning_dict'][trigger_key].append(trigger_phrase)
         save_trigger_dict(bot.dict_filename, bot.memory['triggerwarning_dict'], bot.memory['triggerwarning_lock'])
         bot.reply('saved. ')
+
+@commands('listtriggers')
+def list_triggers(bot, trigger):
+    if not trigger.admin:
+        return
+    if len(bot.memory['triggerwarning_dict'].keys()):
+        bot.reply("I have trigger phrases defined for the following words: " + ", ".join(bot.memory['triggerwarning_dict'].keys()))
+    else:
+        bot.reply("I have no trigger phrases defined!")
+
 
 @rule('[^.].*')
 def didYouHearThat(bot, trigger):
