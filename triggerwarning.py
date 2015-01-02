@@ -10,16 +10,34 @@ from willie.module import commands, rule
 
 import json
 import random
+import re
+
+trigger_probability = 0.5
+
+
+def configure(config):
+    """
+    | [triggerwarning]			| example 	| purpose 				|
+    | ------- 					| ------- 	| -------				|
+    | trigger_probability     	| 0.5  		| Trigger probability	|
+    """
+    if config.option('Configure triggerwarning module', False):
+        config.add_section('triggerwarning')
+        config.interactive_add('triggerwarning', 'trigger_probability', 'Trigger probability, 0.0 - 1.0', '0.5')
+
 
 def setup(self):
+    global trigger_probability
     try:
         with open('triggerwarning_dict.json') as f:
             self.memory['triggerdict'] = defaultdict(list, json.load(f))
     except IOError:
         self.memory['triggerdict'] = defaultdict(list)
         save_trigger_dict(self)
-
-
+    if hasattr(self.config, 'triggerwarning'):
+        trigger_probability = float(self.config.triggerwarning.trigger_probability)
+        
+	
 @commands('releasetrigger')
 def release_trigger(bot, trigger):
     if not trigger.group(2):
@@ -52,12 +70,13 @@ def trigger_def(bot, trigger):
 
 @rule('[^.].*')
 def didYouHearThat(bot, trigger):
+    global trigger_probability
     if bot.nick is trigger.nick:
         return
-
-    for word in trigger.lower().split(' '):
+    whole_word_regex = r"([\w][\w]*'?\w?)"
+    for word in re.compile(whole_word_regex).findall(trigger.lower()):
         if word in bot.memory['triggerdict']:
-            if random.random() < 0.3:
+            if random.random() < trigger_probability:
                 bot.say(random.choice(bot.memory['triggerdict'][word]))
             return
 
