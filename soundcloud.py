@@ -22,15 +22,16 @@ else:
 
 def scget(bot, trigger, uri):
     bytes = web.get(uri)
-    result = json.loads(bytes)
+
     try:
-		song_entry = result[0]
-    except IndexError:
+        result = json.loads(bytes)
+	song_entry = result[0]
+    except (ValueError, KeyError, IndexError) as e:
 		return {'link': 'N/A'}  # Empty result
 
     song_info = {}
     try:
-        song_info['link'] = song_entry['permalink_url']	
+        song_info['link'] = song_entry['permalink_url']
     except KeyError:
         song_info['link'] = 'N/A'
 
@@ -56,7 +57,7 @@ def scget(bot, trigger, uri):
     #get duration in milliseconds, convert to friendly string
     try:
         duration = int(song_entry['duration'])
-       
+
         hours = ((duration / (1000*60*60)) % 24)
         minutes = ((duration / (1000*60)) % 60)
         seconds = (duration / 1000) % 60
@@ -85,7 +86,7 @@ def scget(bot, trigger, uri):
         song_info['likes'] = str('{0:20,d}'.format(int(likes))).lstrip(' ')
     except KeyError:
         song_info['likes'] = 'N/A'
- 
+
     return song_info
 
 @rate(5)
@@ -96,7 +97,7 @@ def scsearch(bot, trigger):
     if not trigger.group(2):
         return
     uri = 'http://api.soundcloud.com/tracks?client_id=3639a3c4768be1fdd5a69afea8bbf619&q=' + trigger.group(2) + '&limit=1'
-    
+
     song_info = scget(bot, trigger, uri)
     if song_info is 'err':
         return
@@ -104,12 +105,12 @@ def scsearch(bot, trigger):
     if song_info['link'] == 'N/A':
         bot.reply("Sorry, I couldn't find the song you are looking for")
         return
-	
+
 	#combine variables and print
     message =  song_info['title'] + \
               ' | Uploaded: ' + song_info['uploaded'] + \
               ' | Duration: ' + song_info['length'] + \
-              ' | ' +  song_info['link'] 
-	
+              ' | ' +  song_info['link']
+
 
     bot.reply(HTMLParser().unescape(message))
