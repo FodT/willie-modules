@@ -74,21 +74,25 @@ def release_trigger(bot, trigger):
 
 
 @commands('trigger')
-@example('.trigger keyword hark! what light through yonder window breaks?')
+@example('.trigger (keyword) (hark! what light through yonder window breaks?)')
 def trigger_def(bot, trigger):
     """Define a new trigger phrase (admin only)"""
+    usage = ".trigger (key phrase) (phrase to use) - include parenthesis - define a new trigger phrase."
     if not trigger.admin:
         return
     if not trigger.group(2):
-        bot.say(".trigger <keyword> <phrase> - define a new trigger phrase.")
+        bot.say(usage)
         return
     else:
-        trigger_sequence = trigger.group(2).strip().partition(r' ')
-        trigger_key = trigger_sequence[0].lower()
-        trigger_phrase = trigger_sequence[2]
-        bot.memory['triggerwarning_dict'][trigger_key].append(trigger_phrase)
-        save_trigger_dict(bot.dict_filename, bot.memory['triggerwarning_dict'], bot.memory['triggerwarning_lock'])
-        bot.reply('saved. ')
+        matches = re.findall(r'\((.+?)\)',trigger.group(0).strip())
+        if len(matches) is 2:
+            key_phrase = matches[0].lower()
+            bot.memory['triggerwarning_dict'][key_phrase].append(matches[1])
+            save_trigger_dict(bot.dict_filename, bot.memory['triggerwarning_dict'], bot.memory['triggerwarning_lock'])
+            bot.reply('saved. ')
+        else:
+            bot.say(usage)
+            return
 
 @commands('listtriggers')
 def list_triggers(bot, trigger):
@@ -96,7 +100,7 @@ def list_triggers(bot, trigger):
     if not trigger.admin:
         return
     if len(bot.memory['triggerwarning_dict'].keys()):
-        bot.reply("I have trigger phrases defined for the following words: " + ", ".join(bot.memory['triggerwarning_dict'].keys()))
+        bot.reply("I have trigger phrases defined for the following phrases: " + ", ".join(bot.memory['triggerwarning_dict'].keys()))
     else:
         bot.reply("I have no trigger phrases defined!")
 
@@ -106,11 +110,10 @@ def didYouHearThat(bot, trigger):
     global trigger_probability
     if bot.nick is trigger.nick:
         return
-    whole_word_regex = r"([\w][\w]*'?\w?)"
-    for word in re.compile(whole_word_regex).findall(trigger.lower()):
-        if word in bot.memory['triggerwarning_dict']:
+    for phrase in bot.memory['triggerwarning_dict']:
+        if phrase in trigger.lower():
             if random.random() < trigger_probability:
-                bot.say(random.choice(bot.memory['triggerwarning_dict'][word]))
+                bot.say(random.choice(bot.memory['triggerwarning_dict'][phrase]))
             return
 
 def save_trigger_dict(fn, data, lock):
