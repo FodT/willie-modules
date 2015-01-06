@@ -6,7 +6,7 @@ define trigger words and phrases for general fun and amusement
 """
 from __future__ import unicode_literals
 from collections import defaultdict
-from willie.module import commands, rule
+from willie.module import commands, rule, example
 
 import json
 import random
@@ -55,7 +55,9 @@ def loadTriggers(fn, lock):
     return result
 
 @commands('releasetrigger')
+@example('.releasetrigger keyword')
 def release_trigger(bot, trigger):
+    """Forget phrases for stated trigger (admin only)"""
     if not trigger.admin:
         return
     if not trigger.group(2):
@@ -72,7 +74,9 @@ def release_trigger(bot, trigger):
 
 
 @commands('trigger')
+@example('.trigger keyword hark! what light through yonder window breaks?')
 def trigger_def(bot, trigger):
+    """Define a new trigger phrase (admin only)"""
     if not trigger.admin:
         return
     if not trigger.group(2):
@@ -88,6 +92,7 @@ def trigger_def(bot, trigger):
 
 @commands('listtriggers')
 def list_triggers(bot, trigger):
+    """List defined trigger phrases (admin only)"""
     if not trigger.admin:
         return
     if len(bot.memory['triggerwarning_dict'].keys()):
