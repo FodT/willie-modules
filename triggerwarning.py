@@ -14,7 +14,7 @@ import re
 import os
 import threading
 
-trigger_probability = 0.5
+default_trigger_probability = 0.5
 
 
 def configure(config):
@@ -25,12 +25,11 @@ def configure(config):
     """
     if config.option('Configure triggerwarning module', False):
         config.add_section('triggerwarning')
-        config.interactive_add('triggerwarning', 'trigger_probability', 'Trigger probability, 0.0 - 1.0', '0.5')
+        config.interactive_add('triggerwarning', 'default_trigger_probability', 'Default Trigger probability, 0.0 - 1.0', '0.5')
 
 
 def setup(self):
-    global trigger_probability
-    fn = 'triggerwarning_dict.json'
+    fn = 'triggerwarning_dict_v2.json'
     self.dict_filename = os.path.join(self.config.dotdir, fn)
     if not os.path.exists(self.dict_filename):
         try:
@@ -44,13 +43,13 @@ def setup(self):
     self.memory['triggerwarning_lock'] = threading.Lock()
 
     if hasattr(self.config, 'triggerwarning'):
-        self.trigger_probability = float(self.config.triggerwarning.trigger_probability)
+        self.default_trigger_probability = float(self.config.triggerwarning.default_trigger_probability)
     self.memory['triggerwarning_dict'] = loadTriggers(self.dict_filename, self.memory['triggerwarning_lock'])
 
 def loadTriggers(fn, lock):
     lock.acquire()
     with open(fn) as f:
-        result = defaultdict(list, json.load(f))
+        result = defaultdict(lambda: defaultdict(list), json.load(f))
     lock.release()
     return result
 
@@ -65,6 +64,7 @@ def release_trigger(bot, trigger):
         return
     else:
         trigger_key = trigger.group(2).strip().lower()
+        bot.reply(trigger_key)
         if trigger_key in bot.memory['triggerwarning_dict']:
             bot.memory['triggerwarning_dict'].pop(trigger_key, None)
             save_trigger_dict(bot.dict_filename, bot.memory['triggerwarning_dict'], bot.memory['triggerwarning_lock'])
@@ -87,7 +87,12 @@ def trigger_def(bot, trigger):
         matches = re.findall(r'\((.+?)\)',trigger.group(0).strip())
         if len(matches) is 2:
             key_phrase = matches[0].lower()
-            bot.memory['triggerwarning_dict'][key_phrase].append(matches[1])
+            trigger_phrases = bot.memory['triggerwarning_dict'][key_phrase]
+
+            prob = trigger_phrases['prob']
+            if not prob:
+                trigger_phrases['prob'] = -1
+            trigger_phrases['phr'].append(matches[1])
             save_trigger_dict(bot.dict_filename, bot.memory['triggerwarning_dict'], bot.memory['triggerwarning_lock'])
             bot.reply('saved. ')
         else:
@@ -107,13 +112,16 @@ def list_triggers(bot, trigger):
 
 @rule('[^.].*')
 def didYouHearThat(bot, trigger):
-    global trigger_probability
+    global default_trigger_probability
     if bot.nick is trigger.nick:
         return
     for phrase in bot.memory['triggerwarning_dict']:
         if phrase in trigger.lower():
+            triggerphrase = random.choice(bot.memory['triggerwarning_dict'][phrase]["phr"])
+            prob = bot.memory['triggerwarning_dict'][phrase]["prob"]
+            trigger_probability = default_trigger_probability if prob ==-1 else prob
             if random.random() < trigger_probability:
-                bot.say(random.choice(bot.memory['triggerwarning_dict'][phrase]))
+                bot.say(triggerphrase)
             return
 
 def save_trigger_dict(fn, data, lock):
